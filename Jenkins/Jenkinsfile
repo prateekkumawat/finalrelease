@@ -1,5 +1,7 @@
 pipeline {
-    agent devops
+    agent {  
+      label "devops"
+    }
     tools {
         jdk 'jdk'
         nodejs 'nodejs'
