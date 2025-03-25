@@ -16,10 +16,11 @@ pipeline {
         stage('Checkout from Git') {
             steps {
                 git branch: "frontend", url: "https://github.com/prateekkumawat/finalrelease.git"
+            }
         }
         stage('Sonarqube Analysis') {
             steps {
-                dir('Application-Code/backend') {
+                dir('src/') {
                     withSonarQubeEnv('sonar-server') {
                         sh ''' $SCANNER_HOME/bin/sonar-scanner \
                         -Dsonar.projectName=frontend-finalrelease \
@@ -37,10 +38,12 @@ pipeline {
         }
         stage('OWASP Dependency-Check Scan') {
             steps {
-                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                srcipt { 
+                   dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                   dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                 }
             }
+        }    
         stage('Trivy File Scan') {
             steps {
                 sh 'trivy fs . > trivyfs.txt'
@@ -50,7 +53,7 @@ pipeline {
             steps {
                 script {
                      sh 'docker build -t frontendtask .'
-                    }
+                    
                 }
             }
         }
@@ -58,9 +61,10 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhubid', usernameVariable: 'docker_user', passwordVariable: 'docker_pass')]) {
-                    sh "docker tag frontendtask ${env.docker_user}/frontendtask:latest"
-                    sh "docker login -u ${env.docker_user} -p ${env.docker_pass}"
-                    sh "docker push ${env.docker_user}/frontendtask:${BUILD_NUMBER}"
+                        sh "docker tag frontendtask ${env.docker_user}/frontendtask:latest"
+                        sh "docker login -u ${env.docker_user} -p ${env.docker_pass}"
+                        sh "docker push ${env.docker_user}/frontendtask:${BUILD_NUMBER}"
+                    }
                 }
             }
         }
