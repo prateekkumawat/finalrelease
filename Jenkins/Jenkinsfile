@@ -59,11 +59,11 @@ pipeline {
                 }
             }
         }
-        stage("ECR Image Pushing") {
+        stage("Doker Image Push") {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhubid', usernameVariable: 'docker_user', passwordVariable: 'docker_pass')]) {
-                        sh "docker tag frontendtask ${env.docker_user}/frontendtask:latest"
+                        sh "docker tag frontendtask ${env.docker_user}/frontendtask:${BUILD_NUMBER}"
                         sh "docker login -u ${env.docker_user} -p ${env.docker_pass}"
                         sh "docker push ${env.docker_user}/frontendtask:${BUILD_NUMBER}"
                     }
