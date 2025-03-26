@@ -8,6 +8,7 @@ pipeline {
     }
     environment  {
         SCANNER_HOME=tool 'sonar-scanner'
+        NVD_API_KEY = credentials('nvd-api-key')
     }
     stages {
         stage('Cleaning Workspace') {
@@ -41,7 +42,13 @@ pipeline {
         stage('OWASP Dependency-Check Scan') {
             steps {
                 script { 
-                   dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                   dependencyCheck additionalArguments: ''' 
+                                    --scan ./ 
+                                    --disableYarnAudit 
+                                    --disableNodeAudit
+                                    --nvd-url https://services.nvd.nist.gov/rest/json
+                                    --nvd-api-key ${env.NVD_API_KEY}
+                                    ''', odcInstallation: 'DP-Check'
                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                 }
             }
