@@ -46,7 +46,7 @@ pipeline {
                                     --scan ./ 
                                     --disableYarnAudit 
                                     --disableNodeAudit
-                                    --nvd-api-key ${env.NVD_API_KEY}
+                                    --nvdApiKey ${env.NVD_API_KEY}
                                     ''', odcInstallation: 'DP-Check'
                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                 }
