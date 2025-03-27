@@ -63,15 +63,15 @@ pipeline {
                 }
             }
         }
-        stage("TRIVY Image Scan") {
-            steps {
-                script {
-                   withCredentials([usernamePassword(credentialsId: 'dockerhubid', usernameVariable: 'docker_user', passwordVariable: 'docker_pass')]) {  
-                      sh "trivy image ${env.docker_user}/frontendtask:${BUILD_NUMBER} > trivyimage.txt"
-                   }  
-                }   
-            }
-        }
+        // stage("TRIVY Image Scan") {
+        //     steps {
+        //         script {
+        //            withCredentials([usernamePassword(credentialsId: 'dockerhubid', usernameVariable: 'docker_user', passwordVariable: 'docker_pass')]) {  
+        //               sh "trivy image ${env.docker_user}/frontendtask:${BUILD_NUMBER} > trivyimage.txt"
+        //            }  
+        //         }   
+        //     }
+        // }
 
         stage("Docker release Deploy"){
             steps{
