@@ -1,5 +1,7 @@
 pipeline {
-    agent any 
+    agent {
+        label "devops"
+    }
     tools {
         jdk 'jdk'
         nodejs 'nodejs'
@@ -16,6 +18,7 @@ pipeline {
         stage('Checkout from Git') {
             steps {
                 git branch: "backend", url: "https://github.com/prateekkumawat/finalrelease.git"
+            }
         }
         stage('Sonarqube Analysis') {
             steps {
@@ -49,13 +52,11 @@ pipeline {
         stage("Docker Image Build") {
             steps {
                 script {
-                    {
-                     sh 'docker build -t backendtask .'
-                    }
+                    sh 'docker build -t backendtask .'
                 }
             }
         }
-        stage("ECR Image Pushing") {
+        stage("DockerHub Push") {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhubid', usernameVariable: 'docker_user', passwordVariable: 'docker_pass')]) {
@@ -63,6 +64,7 @@ pipeline {
                     sh "docker login -u ${env.docker_user} -p ${env.docker_pass}"
                     sh "docker push ${env.docker_user}/backendtask:${BUILD_NUMBER}"
                     sh "docker image rm -f ${env.docker_user}/backendtask:${BUILD_NUMBER}"
+                    }
                 }
             }
         }
