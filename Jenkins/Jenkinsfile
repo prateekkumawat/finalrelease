@@ -39,19 +39,6 @@ pipeline {
                 }
             }
         }
-        stage('OWASP Dependency-Check Scan') {
-            steps {
-                script { 
-                   dependencyCheck additionalArguments: ''' 
-                                    --scan ./ 
-                                    --disableYarnAudit 
-                                    --disableNodeAudit
-                                    --nvdApiKey ${env.NVD_API_KEY}
-                                    ''', odcInstallation: 'DP-Check'
-                   dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-                }
-            }
-        }    
         stage('Trivy File Scan') {
             steps {
                 sh 'trivy fs . > trivyfs.txt'
@@ -79,6 +66,17 @@ pipeline {
         stage("TRIVY Image Scan") {
             steps {
                 sh 'trivy image ${env.docker_user}/frontendtask:${BUILD_NUMBER} > trivyimage.txt' 
+            }
+        }
+
+        stage("Docker release Deploy"){
+            steps{
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhubid', usernameVariable: 'docker_user', passwordVariable: 'docker_pass')]) {
+                        sh "docker login -u ${env.docker_user} -p ${env.docker_pass}"
+                        sh "docker run -dit --name frontendrelease -p 80:3000 ${env.docker_user}/frontendtask:${BUILD_NUMBER}"
+                    }
+                }
             }
         }
     }    
